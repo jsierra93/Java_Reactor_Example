@@ -2,13 +2,14 @@ package co.com.jsierra.reactor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class Main {
     private final static Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        MonoZip();
+        FluxFlatMapParallel();
 
     }
 
@@ -40,5 +41,18 @@ public class Main {
         test.subscribe(
                 val -> log.info("Result {}", val)
         );
+    }
+
+    public static void FluxFlatMapParallel(){
+        Flux<Integer> fluxTest = Flux.just("Esto","es","una","prueba")
+                .flatMap( val -> {
+                    printLog("", val);
+                    return Flux.just(val.length());});
+
+        fluxTest.subscribe(val -> printLog("", val.toString()));
+    }
+
+    public static void printLog(String operator, String data){
+        System.out.println("Operator: "+operator+ " data: "+data+" Thread: "+Thread.currentThread().getName());
     }
 }
