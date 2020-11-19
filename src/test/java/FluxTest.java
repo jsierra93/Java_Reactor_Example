@@ -2,8 +2,11 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
+import reactor.util.function.Tuples;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FluxTest {
 private final static Logger log = LoggerFactory.getLogger(FluxTest.class);
@@ -88,7 +91,69 @@ private final static Logger log = LoggerFactory.getLogger(FluxTest.class);
         );
     }
 
+    @Test
+    public void FluxZipFlatMap(){
+        Flux<String> fluxTest = Flux.just("Esto","es","una","prueba");
+        Flux<String> fluxTest2 = Flux.just("de","programacion","reactiva","java");
+
+        Flux<Integer> fluxResult = Flux.zip(
+                fluxTest, fluxTest2
+        ).flatMap(
+                val ->
+                {   Integer valor =  val.getT1().length()+val.getT2().length();
+                    return Flux.just(valor);}
+        ).log();
+
+        fluxResult.subscribe(
+                val -> log.info("valor {}", val),
+                error -> log.info("error {}", error),
+                ()-> log.info("Completado")
+        );
+    }
+
+    @Test
+    public void FluxFromArrayDelay() throws InterruptedException {
+        ArrayList<Integer> lista = new ArrayList<>();
+        lista.add(1);
+        lista.add(2);
+        lista.add(3);
+        lista.add(4);
+        lista.add(5);
+
+        Flux.fromIterable(lista)
+                .map(val -> val  + 100)
+                .delayElements(Duration.ofSeconds(2))
+                .log()
+                .subscribe(
+                        val -> log.info("valor {}", val)
+                );
+        Thread.sleep(20_000);
+    }
+
+    @Test
+    public void FluxGenerate() throws InterruptedException {
+        generateFibonacciWithTuples()
+                .take(10)
+                .map(val -> val  + 100)
+                .delayElements(Duration.ofSeconds(2))
+                .log()
+                .subscribe(
+                        val -> log.info("valor {}", val)
+                );
+        Thread.sleep(20_000);
+    }
+
     public static void printLog(String operator, String data){
         System.out.println("Operator: "+operator+ " data: "+data+" Thread: "+Thread.currentThread().getName());
+    }
+
+    public Flux<Integer> generateFibonacciWithTuples() {
+        return Flux.generate(
+                () -> Tuples.of(0, 1),
+                (state, sink) -> {
+                    sink.next(state.getT1());
+                    return Tuples.of(state.getT2(), state.getT1() + state.getT2());
+                }
+        );
     }
 }
