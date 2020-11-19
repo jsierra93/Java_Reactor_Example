@@ -1,4 +1,3 @@
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,13 +6,30 @@ import reactor.test.StepVerifier;
 
 
 
-public class ReactorTest {
+public class MonoTest {
 
-    private final static Logger log = LoggerFactory.getLogger(ReactorTest.class);
+    private final static Logger log = LoggerFactory.getLogger(MonoTest.class);
+
+    @Test
+    public void MonoZip() {
+        Mono<String> testMono = Mono.just("Demo");
+        Mono<String> testMono2 = Mono.just("Reactor");
+
+        Mono<String> test = Mono.zip(
+                testMono, testMono2
+        ).flatMap(t1 -> {
+            String res = t1.getT1() + "-" + t1.getT2();
+            return Mono.just(res);
+        }).log();
+
+        test.subscribe(
+                val -> log.info("Result {}", val)
+        );
+    }
 
     @Test
     public void monoSubscriber() {
-        String name = "William Suane";
+        String name = "Demo Mono";
         Mono<String> mono = Mono.just(name)
                 .log();
 
@@ -26,7 +42,7 @@ public class ReactorTest {
 
     @Test
     public void monoSubscriberConsumer() {
-        String name = "William Suane";
+        String name = "Demo Mono";
         Mono<String> mono = Mono.just(name)
                 .log();
 
@@ -40,7 +56,7 @@ public class ReactorTest {
 
     @Test
     public void monoSubscriberConsumerError() {
-        String name = "William Suane";
+        String name = "Demo Mono";
         Mono<String> mono = Mono.just(name)
                 .map(s -> {
                     throw new RuntimeException("Testing mono with error");
@@ -58,7 +74,7 @@ public class ReactorTest {
 
     @Test
     public void monoSubscriberConsumerComplete() {
-        String name = "William Suane";
+        String name = "Demo Mono";
         Mono<String> mono = Mono.just(name)
                 .log()
                 .map(String::toUpperCase);
@@ -76,7 +92,7 @@ public class ReactorTest {
 
     @Test
     public void monoSubscriberConsumerSubscription() {
-        String name = "William Suane";
+        String name = "Demo Mono";
         Mono<String> mono = Mono.just(name)
                 .log()
                 .map(String::toUpperCase);
@@ -95,7 +111,7 @@ public class ReactorTest {
 
     @Test
     public void monoDoOnMethods() {
-        String name = "William Suane";
+        String name = "Demo Mono";
         Mono<Object> mono = Mono.just(name)
                 .log()
                 .map(String::toUpperCase)
@@ -115,7 +131,7 @@ public class ReactorTest {
     @Test
     public void monoDoOnError() {
         Mono<Object> error = Mono.error(new IllegalArgumentException("Illegal argument exception"))
-                .doOnError(e -> ReactorTest.log.error("Error message: {}", e.getMessage()))
+                .doOnError(e -> MonoTest.log.error("Error message: {}", e.getMessage()))
                 .doOnNext(s -> log.info("Executing this doOnNext"))
                 .log();
 
@@ -126,13 +142,13 @@ public class ReactorTest {
 
     @Test
     public void monoOnErrorResume() {
-        String name = "William Suane";
+        String name = "Demo Mono";
         Mono<Object> error = Mono.error(new IllegalArgumentException("Illegal argument exception"))
                 .onErrorResume(s -> {
                     log.info("Inside On Error Resume");
                     return Mono.just(name);
                 })
-                .doOnError(e -> ReactorTest.log.error("Error message: {}", e.getMessage()))
+                .doOnError(e -> MonoTest.log.error("Error message: {}", e.getMessage()))
                 .log();
 
         StepVerifier.create(error)
@@ -142,14 +158,14 @@ public class ReactorTest {
 
     @Test
     public void monoOnErrorReturn() {
-        String name = "William Suane";
+        String name = "Demo Mono";
         Mono<Object> error = Mono.error(new IllegalArgumentException("Illegal argument exception"))
                 .onErrorReturn("EMPTY")
                 .onErrorResume(s -> {
                     log.info("Inside On Error Resume");
                     return Mono.just(name);
                 })
-                .doOnError(e -> ReactorTest.log.error("Error message: {}", e.getMessage()))
+                .doOnError(e -> MonoTest.log.error("Error message: {}", e.getMessage()))
                 .log();
 
         StepVerifier.create(error)
