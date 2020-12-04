@@ -156,4 +156,8 @@ private final static Logger log = LoggerFactory.getLogger(FluxTest.class);
                 }
         );
     }
+
+    public void fluxGenerate(){
+
+    }
 }
