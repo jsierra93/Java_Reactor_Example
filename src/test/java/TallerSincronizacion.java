@@ -29,14 +29,29 @@ public class TallerSincronizacion {
 
     @Test
     public void Operations(){
-        Flux<Movie> newFlux = Flux.merge(generateMovies1(), generateMovies2())
-                .filter( mv -> mv.getDurationSecunds() > 120)
-                .filter( mv -> mv.getScore() > 8)
-                .filter( mv -> mv.getDirector().equals("Peter Jackson"));
-
+        LOGGER.info(" -------- Merge ------------");
+        Flux<Movie> newFlux = Flux.merge(generateMovies1(), generateMovies2());
         newFlux.subscribe(
                 val -> LOGGER.info("Movie : "+val)
         );
+
+        LOGGER.info(" -------- Duration > 120  ------------");
+        newFlux.filter( mv -> mv.getDurationSecunds() > 120)
+                .subscribe(
+                        val -> LOGGER.info("Movie : "+val)
+                );
+
+        LOGGER.info(" -------- Score > 8  ------------");
+        newFlux.filter( mv -> mv.getScore() > 8)
+                .subscribe(
+                        val -> LOGGER.info("Movie : "+val)
+                );
+
+        LOGGER.info(" -------- Director ------------");
+        newFlux.filter( mv -> mv.getDirector().equals("Peter Jackson"))
+                .subscribe(
+                        val -> LOGGER.info("Movie : "+val)
+                );
     }
 
 }
